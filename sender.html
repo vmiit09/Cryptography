@@ -1,0 +1,259 @@
+<!doctype= html>
+<html>
+<head>
+<title>RC4-Assignment2</title>
+
+<!--- External source Java script of MD5--->
+<script type="text/javascript" src="md5.js"></script>
+<!--- Java script for KSA at sender and receiver --->
+<script type="text/javascript" src="ksa.js"></script>
+<!--- Java script for PRGA at sender and receiver --->
+<script type="text/javascript" src="prga.js"></script>
+<!--- Java script for IPRGA at receiver --->
+<script type="text/javascript" src="iprga.js"></script>
+<!-- Java script function for receiver --->
+<script type="text/javascript" src="receiver.js"></script>
+</head>
+<style>
+
+body {
+    max-width: 100%;
+<!---    overflow-x: hidden;--->
+}
+
+#transmitter
+{
+	width: 660px; 
+	height: 440px;
+	display: inline;
+	float: left;
+}
+
+#receiver
+{
+	width: 660px; 
+	height: 440px;
+	display: inline;
+	float: right;
+}
+
+
+#ntext,#ksa,#prga,#ctext,#iprga,#ptext {
+  <!-- width: auto; -->
+<!--display: block;  --->
+   white-space:nowrap; 
+  text-align: left;
+  overflow: auto;
+ <!--- position:relative;--->
+}
+
+
+ </style>
+<body>
+<H1>RC4 state based secure unicast protocol </H1>
+<div id ="transmitter">
+<H2>RC4 Sender</H2>
+</br>
+	<p> <b>Enter the key  : </b></p> 
+  <textarea id="seckey" cols="80" rows="3"></textarea>
+  </br>
+
+  <p> <b>Enter Plain Text : </b></p> 
+  <textarea id="inputtext" cols="80" rows="10"></textarea>
+  </br>
+  </br></br>
+  <button id ="submit">Submit</button>
+ </br>
+  </br>
+<div id ="ctext"></div>
+</br>
+<div id ="sent" ></div>
+</div>
+<div id ="receiver">
+<H2>RC4 Receiver </H2>
+</br>
+	<p> <b>Enter the key  : </b></p> 
+  <textarea id="seckey1" cols="80" rows="3"></textarea>
+  </br>
+  
+  </br><b><p>Sequence: </p></b>
+  <select name="sequence" id="sequence">
+  <option selected>Case 1</option>
+  <option>Case 2</option>
+  <option>Case 3</option>
+  </select>
+</br>
+  </br>
+
+  </br></br>
+  <button id ="submit1">Submit</button>
+ </br>
+<div id ="messhashtext"></div>
+</br>
+ </br>
+<div id ="sendhashtext"></div>
+</br>
+ </br>
+<div id ="rechashtext"></div>
+</br>
+ </br>
+<div id ="ntext"></div>
+</br>
+</div>
+<script type="text/javascript">	
+var resulted = [];
+
+var string_key = '';
+var string_key1;
+var s = [];
+var t =[];
+submit.onclick = function()
+{
+
+//input key
+string_key = document.getElementById("seckey").value;
+
+resulted =[];
+// input string of message
+var str = '';
+str = document.getElementById("inputtext").value;
+
+if (string_key =='' || str == '' )
+{
+alert ("Missing key or text");
+}
+else
+{
+
+// block size
+var blocks = Math.floor((str.length/252))  + 1;
+
+
+//Padding  the data with 10000000000....//
+
+if(str.length % 252 ==251)
+{
+str+= str + String.fromCharCode(128);
+}
+
+if(str.length % 252 !=0 && str.length % 252 !=251)
+{
+	str+= String.fromCharCode(128);
+		for(i=1;i<(str.length%252);i++)
+			{
+			str+= String.fromCharCode(0);
+			}
+}
+
+// initial state of RC4 
+ for (i=0;i<256;i++)
+ {
+ s[i]=i;
+ }
+
+
+ // calling ksa function
+ksa(); 
+
+// converting the text into blocks
+ var b=0;
+ var strr =[];
+ while (b<str.length)
+ {
+ var texted = '';
+	for(c=b;c< b+252;c++)
+		{
+		 texted+= String.fromCharCode(str.charCodeAt(c));
+		 if(c >= str.length-1)
+		 { 
+		 break;
+		 }
+		}
+		// storing 252 byte of data and calling hash function to get 16 bit hash
+		strr.push([texted+hashCode(texted)]);		
+		//16 bit MDI hash is used
+		b= b+252;
+		// incrementer for the blocks
+ }
+ 
+ var result =[];
+ // saving result of PRGA
+ var first =0,last =0;
+ //storing the value of i and j for each run of prga
+ 
+ 
+ var c10,c1,c2,c3;
+var ctext ='';
+ // storing the output cipher text
+ for(a=0;a<blocks;a++)
+ {
+ result= prga(first,last); //calling prga for a times
+ var cipherst = result[0];
+ var ces ='';	
+
+ for(r=0;r<268;r++)
+ {
+  ces += String.fromCharCode((strr[a][0].charCodeAt(r) )^ cipherst[r][0]);
+ }
+ first = result[1];
+ last =result[2];
+ 
+ // set up the counter
+ c3 = Math.floor(a%10);
+ c2 = Math.floor((a/10) %10);
+ c1 = Math.floor((a/100) %100);
+ c0 =  Math.floor((a/1000) %1000);
+ // storing the resulted cipher
+ resulted.push([c0.toString()+c1.toString()+c2.toString()+c3.toString() +ces]);
+ ctext+= "</br>Packet " + a + ": </br> "+(c0.toString()+c1.toString()+c2.toString()+c3.toString()+ces) + "</br>";	
+ }
+document.getElementById("ctext").innerHTML = 'Cipher text:\n'+ctext ;	
+
+document.getElementById("sent").innerHTML = "Message sent !" ;	
+ }
+ }
+  submit1.onclick = function()
+{
+if  (resulted.length >0)
+{ //message has been received
+receivers(resulted);
+}
+else
+{
+alert ("No message received");
+}
+}
+
+ 
+<!------ MD5 Hashing Function ----->
+function hashCode(str){
+
+md5(str);
+var hash = md5.create();
+hash.update(str);
+hash.hex();
+var hashed = hash.array();
+var ka ='';
+for(i=0;i<hashed.length;i++)
+{
+ ka+=String.fromCharCode(hashed[i]);
+}
+return ka;
+}
+
+<!-------- Function for Swap -------->
+
+
+function swap (k,l)
+{
+var temp =s[k];
+s[k]=s[l];
+s[l]=temp;
+}
+
+
+ 
+</script>
+
+</body>
+</html>

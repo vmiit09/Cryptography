@@ -5,8 +5,11 @@ The program on RC4 Secure based unicast protocol has been developed in Web platf
 
  SOFTWARE REQUIREMENTS:
 Platform	Web
+
 Programming Language	HTML, JavaScript, CSS
+
 Key	ABCDEF0123456789ABC2018200384138
+
 Browsers	Google Chrome, Internet Explorer
 
 	RC4  SENDER:

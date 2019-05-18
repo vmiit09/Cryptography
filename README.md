@@ -23,7 +23,7 @@ Browsers	Google Chrome, Internet Explorer
 
   
 	RC4 RECIEVER:
-1.Receiver is responsible for providing decrypting facility. The function “receivers” is called to decrypt the data in receiver.js where the decryption is performed.
+1. Receiver is responsible for providing decrypting facility. The function “receivers” is called to decrypt the data in receiver.js where the decryption is performed.
 2. By applying definite rounds of PRGA and IPRGA to compute the correct RC4 state from the current data packet. (receivers.js)
 3. Once the text is decrypted by RC4 we obtain the Hash value for the current data packet, and then set SC value for receiver.  (receivers.js)
 4. The receiver also calculates the hash value of message and compares it with the received hash value.
